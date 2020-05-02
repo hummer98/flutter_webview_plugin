@@ -38,7 +38,7 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
         if (!self.webview)
             [self initWebview:call withResult:result];
         else
-            [self navigate:call];
+            [self navigate:call shouldHandleCookies:false];
         result(nil);
     } else if ([@"close" isEqualToString:call.method]) {
         [self closeWebView];
@@ -158,7 +158,7 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     UIViewController* currentViewController = presentedViewController != nil ? presentedViewController : self.viewController;
     [currentViewController.view addSubview:self.webview];
 
-    [self navigate:call];
+    [self navigate:call shouldHandleCookies:false];
 }
 
 - (void)webView:(WKWebView *)webView didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential *credential))completionHandler {
@@ -191,7 +191,7 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     [channel invokeMethod:@"onScrollYChanged" arguments:yDirection];
 }
 
-- (void)navigate:(FlutterMethodCall*)call {
+- (void)navigate:(FlutterMethodCall*)call shouldHandleCookies:(bool)shouldHandleCookies {
     if (self.webview != nil) {
             NSString *url = call.arguments[@"url"];
             NSNumber *withLocalUrl = call.arguments[@"withLocalUrl"];
@@ -216,7 +216,7 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
                 if (headers != nil) {
                     [request setAllHTTPHeaderFields:headers];
                 }
-
+                request.HTTPShouldHandleCookies = shouldHandleCookies;
                 [self.webview loadRequest:request];
             }
         }
